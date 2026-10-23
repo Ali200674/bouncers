@@ -7,7 +7,6 @@
 #include <bn_vector.h>
 #include <bn_log.h>
 
-// #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_jalapeno.h"
 
 // Set max/min x position to be the edges of the display
@@ -30,16 +29,21 @@ static constexpr int MAX_BOUNCERS = 20;
 // Random value gen
 static bn::random rng;
 
+static constexpr bn::fixed BASE_ROTATION_SPEED = 3;
+static constexpr bn::fixed HIGH_ROTATION_SPEED = 10;
+
 class Bouncer {
     public:
         bn::sprite_ptr sprite;
         bn::fixed x_speed;
         bn::fixed y_speed;
+        bn::fixed current_rotation_speed;
     
         Bouncer(bn::fixed x_start, bn::fixed y_start) : 
         sprite(bn::sprite_items::jalapeno.create_sprite(x_start, y_start)), 
         x_speed(rng.get_fixed(-2, 2)),
-        y_speed(rng.get_fixed(-2, 2)) {
+        y_speed(rng.get_fixed(-2, 2)),
+        current_rotation_speed(rng.get_fixed(BASE_ROTATION_SPEED)) {
 
         }
 
@@ -47,6 +51,9 @@ class Bouncer {
 
             bn::fixed x = sprite.x();
             bn::fixed y = sprite.y();
+
+            // Set rotation of sprite
+            sprite.set_rotation_angle_safe(sprite.rotation_angle() + current_rotation_speed);
 
             // Update x and y position by adding speed
             x += x_speed;
@@ -57,12 +64,18 @@ class Bouncer {
                 // Snap back to screen and reverse direction
                 x = MAX_X;
                 x_speed *=-1;
+
+                // Change rotation speed to something much higher or lower
+                current_rotation_speed = rng.get_fixed(-HIGH_ROTATION_SPEED, HIGH_ROTATION_SPEED);
             }
             // If we've gone off the screen on the left
             if(x < MIN_X) {
                 // Snap back to screen and reverse direction
                 x = MIN_X;
                 x_speed *= -1;
+                
+                // Change rotation speed to something much higher or lower
+                current_rotation_speed = rng.get_fixed(-HIGH_ROTATION_SPEED, HIGH_ROTATION_SPEED);
             }
 
             // If we reach the top
@@ -70,6 +83,9 @@ class Bouncer {
                 // Snap back and reverse direction
                 y = MIN_Y;
                 y_speed *= -1;
+                
+                // Change rotation speed to something much higher or lower
+                current_rotation_speed = rng.get_fixed(-HIGH_ROTATION_SPEED, HIGH_ROTATION_SPEED);
             }
 
             // If we reach the bottom
@@ -77,6 +93,9 @@ class Bouncer {
                 // Snap back and reverse direction
                 y = MAX_Y;
                 y_speed *= -1;
+                
+                // Change rotation speed to something much higher or lower
+                current_rotation_speed = rng.get_fixed(-HIGH_ROTATION_SPEED, HIGH_ROTATION_SPEED);
             }
 
             // Set both cords of sprite
