@@ -29,6 +29,7 @@ static constexpr int MAX_BOUNCERS = 20;
 // Random value gen
 static bn::random rng;
 
+// Rotation speeds
 static constexpr bn::fixed BASE_ROTATION_SPEED = 3;
 static constexpr bn::fixed HIGH_ROTATION_SPEED = 10;
 
@@ -38,11 +39,15 @@ class Bouncer {
         bn::fixed x_speed;
         bn::fixed y_speed;
         bn::fixed current_rotation_speed;
+
+        // Other words, six seconds
+        bn::fixed timeAlive = 360;
+        bn::fixed timeRemove = 1;
     
         Bouncer(bn::fixed x_start, bn::fixed y_start) : 
         sprite(bn::sprite_items::jalapeno.create_sprite(x_start, y_start)), 
-        x_speed(rng.get_fixed(-2, 2)),
-        y_speed(rng.get_fixed(-2, 2)),
+        x_speed(rng.get_fixed(-BASE_SPEED, BASE_SPEED)),
+        y_speed(rng.get_fixed(-BASE_SPEED, BASE_SPEED)),
         current_rotation_speed(rng.get_fixed(BASE_ROTATION_SPEED)) {
 
         }
@@ -51,6 +56,10 @@ class Bouncer {
 
             bn::fixed x = sprite.x();
             bn::fixed y = sprite.y();
+            
+            // Decrement the time the sprite has to live
+            timeAlive -= timeRemove;
+            
 
             // Set rotation of sprite
             sprite.set_rotation_angle_safe(sprite.rotation_angle() + current_rotation_speed);
@@ -96,6 +105,10 @@ class Bouncer {
                 
                 // Change rotation speed to something much higher or lower
                 current_rotation_speed = rng.get_fixed(-HIGH_ROTATION_SPEED, HIGH_ROTATION_SPEED);
+            }
+
+            if (timeAlive <= 0) {
+                this->sprite.set_visible(false);
             }
 
             // Set both cords of sprite
